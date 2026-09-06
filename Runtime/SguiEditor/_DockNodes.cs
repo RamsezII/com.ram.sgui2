@@ -14,6 +14,7 @@ namespace _SGUI2_
         sealed class DockGroup : DockNode
         {
             public readonly List<SguiWindow> windows = new();
+            public TabView tabView;
             public DockGroup(in SguiWindow window)
             {
                 windows.Add(window);

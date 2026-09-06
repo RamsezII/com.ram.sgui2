@@ -13,7 +13,7 @@ namespace _SGUI2_
 
         //--------------------------------------------------------------------------------------------------------------
 
-        void AwakeLayers()
+        void Setup()
         {
             dockLayer = CreateLayer();
             floatingLayer = CreateLayer();
@@ -50,6 +50,7 @@ namespace _SGUI2_
 
             root.Clear();
             root.style.flexGrow = 1;
+            root.style.backgroundColor = new Color(0, 0, 0, .75f);
 
             root.Add(dockLayer);
             root.Add(floatingLayer);

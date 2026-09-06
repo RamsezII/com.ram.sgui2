@@ -126,6 +126,8 @@ namespace _SGUI2_
 
             tabView.style.flexGrow = 1;
 
+            group.tabView = tabView;
+
             foreach (var window in group.windows)
             {
                 var tab = new Tab(window.title);
@@ -150,6 +152,23 @@ namespace _SGUI2_
             splitView.Add(CreateDockVisual(split.second));
 
             return splitView;
+        }
+
+        void DockWindow(in SguiWindow window, in DockGroup target, in SguiDockSide side, in float fixedPaneDimension = 300)
+        {
+            if (side == SguiDockSide.Center)
+                target.windows.Add(window);
+            else
+            {
+                var incoming = new DockGroup(window);
+                SplitNode(
+                    target,
+                    incoming,
+                    side,
+                    fixedPaneDimension
+                );
+            }
+            ReloadDock();
         }
     }
 }

@@ -33,9 +33,8 @@ namespace _SGUI2_
             DontDestroyOnLoad(gameObject);
 
             panelRenderer = GetComponent<PanelRenderer>();
+            Setup();
             panelRenderer.RegisterUIReloadCallback(OnUIReload);
-
-            AwakeLayers();
 
             base.Awake();
 
