@@ -63,6 +63,8 @@ namespace _SGUI2_
         {
             if (root == null)
                 return;
+            if (!toggle._value)
+                CancelDrag();
             root.style.display = toggle._value ? DisplayStyle.Flex : DisplayStyle.None;
         }
     }

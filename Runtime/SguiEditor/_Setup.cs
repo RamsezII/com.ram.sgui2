@@ -19,6 +19,7 @@ namespace _SGUI2_
             floatingLayer = CreateLayer();
             modalLayer = CreateLayer();
             popupLayer = CreateLayer();
+            SetupDrag();
 
             static VisualElement CreateLayer()
             {
@@ -41,6 +42,13 @@ namespace _SGUI2_
         void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
         {
             bool sameRoot = this.root == root;
+            if (!sameRoot)
+            {
+                CancelDrag();
+                if (this.root != null)
+                    RegisterDragCallbacks(this.root, false);
+                RegisterDragCallbacks(root, true);
+            }
             this.root = root;
 
             Debug.Log($"{this}.{nameof(OnUIReload)}({nameof(version)}: {version}".ToSubLog(), this);
@@ -57,6 +65,7 @@ namespace _SGUI2_
             root.Add(floatingLayer);
             root.Add(modalLayer);
             root.Add(popupLayer);
+            root.Add(dragLayer);
 
             OnToggleVisual();
         }

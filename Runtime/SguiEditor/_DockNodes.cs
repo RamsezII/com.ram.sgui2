@@ -7,11 +7,18 @@ namespace _SGUI2_
     {
         sealed class DockGroup : TabView
         {
+            readonly SguiEditor editor;
+
             public DockGroup(SguiEditor editor)
             {
+                this.editor = editor;
                 reorderable = true;
                 style.flexGrow = 1;
-                RegisterCallback<PointerDownEvent>(_ => editor.activeGroup = this, TrickleDown.TrickleDown);
+                RegisterCallback<PointerDownEvent>(_ =>
+                {
+                    editor.activeGroup = this;
+                    GetFirstAncestorOfType<FloatingWindow>()?.BringToFront();
+                }, TrickleDown.TrickleDown);
                 RegisterCallback<FocusInEvent>(_ => editor.activeGroup = this);
                 activeTabChanged += (_, current) =>
                 {
@@ -33,6 +40,8 @@ namespace _SGUI2_
                 tab.Add(window);
                 Add(tab);
                 activeTab = tab;
+                // Own the gesture on the entire header; TabView still owns tab order and selection.
+                tab.tabHeader.RegisterCallback<PointerDownEvent>(evt => editor.BeginTabDrag(window, tab, evt), TrickleDown.TrickleDown);
             }
 
             public void RemoveWindow(SguiWindow window)

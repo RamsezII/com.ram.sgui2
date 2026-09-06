@@ -30,7 +30,7 @@ namespace _SGUI2_
                 return;
             }
 
-            if (dockRoot == null)
+            if (activeGroup == null && dockRoot == null)
             {
                 activeGroup = new DockGroup(this);
                 dockRoot = activeGroup;
@@ -66,6 +66,9 @@ namespace _SGUI2_
             if (group == null)
                 return;
 
+            if (window == draggedWindow || (draggedFrame != null && draggedFrame.Contains(window)))
+                CancelDrag();
+
             group.RemoveWindow(window);
             RemoveEmptyGroup(group);
             window.OnClosed();
@@ -76,7 +79,7 @@ namespace _SGUI2_
             if (window == null)
                 throw new ArgumentNullException(nameof(window));
             var group = window.GetFirstAncestorOfType<DockGroup>();
-            if (group != null && !dockLayer.Contains(group))
+            if (group != null && !dockLayer.Contains(group) && !floatingLayer.Contains(group))
                 throw new ArgumentException("The window belongs to another editor.", nameof(window));
             return group;
         }
@@ -143,7 +146,11 @@ namespace _SGUI2_
 
             var split = group.GetFirstAncestorOfType<DockSplit>();
             if (split == null)
+            {
+                var floating = group.GetFirstAncestorOfType<FloatingWindow>();
                 ReplaceNode(group, null);
+                floating?.RemoveFromHierarchy();
+            }
             else
             {
                 var remaining = split[0] == group ? split[1] : split[0];
@@ -152,7 +159,14 @@ namespace _SGUI2_
             }
 
             if (activeGroup == group)
-                activeGroup = FindGroup(dockRoot);
+                activeGroup = FindAnyGroup();
+        }
+
+        DockGroup FindAnyGroup()
+        {
+            if (dockRoot != null)
+                return FindGroup(dockRoot);
+            return floatingLayer.childCount == 0 ? null : FindGroup(floatingLayer[floatingLayer.childCount - 1][0]);
         }
 
         static DockGroup FindGroup(VisualElement node)
