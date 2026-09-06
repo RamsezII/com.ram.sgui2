@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -6,7 +7,7 @@ namespace _SGUI2_.Editor.Tests
 {
     internal class QuickTool : EditorWindow
     {
-        [MenuItem("Assets/" + nameof(_SGUI2_) + "/" + nameof(QuickTool) + "/" + nameof(ShowWindow) + " _%#T")]
+        [MenuItem("Assets/" + nameof(_SGUI2_) + "/" + nameof(QuickTool) + " " + nameof(ShowWindow) + " _%#T")]
         public static void ShowWindow()
         {
             var window = GetWindow<QuickTool>();
@@ -18,13 +19,19 @@ namespace _SGUI2_.Editor.Tests
 
         public void CreateGUI()
         {
-            VisualElement root = rootVisualElement;
+            var root = rootVisualElement;
 
-            Label label = new() { text = "Label", };
-            root.Add(label);
-
-            Button button = new() { text = "Button", };
-            root.Add(button);
+            foreach (var code in Util.EGetEnumValues<PrimitiveType>())
+            {
+                var button = new Button(() =>
+                {
+                    Debug.Log(code, this);
+                    var go = ObjectFactory.CreatePrimitive(code);
+                    go.transform.position = Vector3.zero;
+                });
+                button.Add(new Label(code.ToString()));
+                root.Add(button);
+            }
         }
     }
 }
