@@ -40,17 +40,18 @@ namespace _SGUI2_
 
         void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
         {
+            bool sameRoot = this.root == root;
             this.root = root;
 
             Debug.Log($"{this}.{nameof(OnUIReload)}({nameof(version)}: {version}".ToSubLog(), this);
 
-            if (version == uiVersion)
+            if (sameRoot && version == uiVersion && dockLayer.parent == root)
                 return;
             uiVersion = version;
 
             root.Clear();
             root.style.flexGrow = 1;
-            root.style.backgroundColor = new Color(0, 0, 0, .75f);
+            root.style.backgroundColor = new Color(0, 0, 0, .85f);
 
             root.Add(dockLayer);
             root.Add(floatingLayer);

@@ -1,4 +1,5 @@
-﻿using _SGUI2_.windows;
+using System;
+using _SGUI2_.windows;
 using UnityEngine.UIElements;
 
 namespace _SGUI2_
@@ -15,70 +16,150 @@ namespace _SGUI2_
     partial class SguiEditor
     {
         VisualElement dockRoot;
+        DockGroup activeGroup;
 
-        //--------------------------------------------------------------------------------------------------------------
-
-        public void OpenWindow(in SguiWindow window, in SguiDockSide side = SguiDockSide.Center, in float fixedPaneDimension = 300)
+        // Opening an existing instance only selects it. Use DockWindow to move it.
+        public void OpenWindow(SguiWindow window, SguiDockSide side = SguiDockSide.Center, float fixedPaneDimension = 300)
         {
+            ValidateDock(window, side, fixedPaneDimension);
+            var existing = GetWindowGroup(window);
+            if (existing != null)
+            {
+                existing.SelectWindow(window);
+                activeGroup = existing;
+                return;
+            }
+
             if (dockRoot == null)
             {
-                var group = new DockGroup();
-                group.AddWindow(window);
-
-                dockRoot = group;
-                dockLayer.Add(group);
-
+                activeGroup = new DockGroup(this);
+                dockRoot = activeGroup;
+                dockLayer.Add(dockRoot);
+                activeGroup.AddWindow(window);
                 return;
             }
-            ((DockGroup)dockRoot).AddWindow(window);
+
+            Dock(window, activeGroup ?? FindGroup(dockRoot), side, fixedPaneDimension);
         }
 
-        void Dock(
-            in SguiWindow window,
-            in DockGroup target,
-            in SguiDockSide side,
-            in float size = 300
-            )
+        public void DockWindow(SguiWindow window, SguiWindow targetWindow, SguiDockSide side = SguiDockSide.Center, float size = 300)
         {
-            if (side == SguiDockSide.Center)
+            ValidateDock(window, side, size);
+            var target = GetWindowGroup(targetWindow);
+            if (target == null)
+                throw new ArgumentException("The target window must be open in this editor.", nameof(targetWindow));
+
+            // Docking relative to yourself has no useful destination.
+            if (window == targetWindow)
             {
-                target.AddWindow(window);
+                target.SelectWindow(window);
+                activeGroup = target;
                 return;
             }
 
-            var incoming = new DockGroup();
-            incoming.AddWindow(window);
+            Dock(window, target, side, size);
+        }
 
-            var parent = target.parent;
+        public void CloseWindow(SguiWindow window)
+        {
+            var group = GetWindowGroup(window);
+            if (group == null)
+                return;
 
-            target.RemoveFromHierarchy();
+            group.RemoveWindow(window);
+            RemoveEmptyGroup(group);
+            window.OnClosed();
+        }
 
-            bool before =
-                side == SguiDockSide.Left ||
-                side == SguiDockSide.Top;
+        DockGroup GetWindowGroup(SguiWindow window)
+        {
+            if (window == null)
+                throw new ArgumentNullException(nameof(window));
+            var group = window.GetFirstAncestorOfType<DockGroup>();
+            if (group != null && !dockLayer.Contains(group))
+                throw new ArgumentException("The window belongs to another editor.", nameof(window));
+            return group;
+        }
 
-            var orientation =
-                side is SguiDockSide.Left or SguiDockSide.Right
+        static void ValidateDock(SguiWindow window, SguiDockSide side, float size)
+        {
+            if (window == null)
+                throw new ArgumentNullException(nameof(window));
+            if (side < SguiDockSide.Center || side > SguiDockSide.Bottom)
+                throw new ArgumentOutOfRangeException(nameof(side));
+            if (side != SguiDockSide.Center && (float.IsNaN(size) || float.IsInfinity(size) || size <= 0))
+                throw new ArgumentOutOfRangeException(nameof(size));
+        }
+
+        void Dock(SguiWindow window, DockGroup target, SguiDockSide side, float size)
+        {
+            var source = GetWindowGroup(window);
+            if (source == target && side == SguiDockSide.Center)
+            {
+                target.SelectWindow(window);
+                activeGroup = target;
+                return;
+            }
+
+            source?.RemoveWindow(window);
+            var destination = target;
+            if (side != SguiDockSide.Center)
+            {
+                destination = new DockGroup(this);
+                bool before = side is SguiDockSide.Left or SguiDockSide.Top;
+                var orientation = side is SguiDockSide.Left or SguiDockSide.Right
                     ? TwoPaneSplitViewOrientation.Horizontal
                     : TwoPaneSplitViewOrientation.Vertical;
+                var split = new DockSplit(before ? 0 : 1, size, orientation);
 
-            var split = new DockSplit(
-                before ? incoming : target,
-                before ? target : incoming,
-                before ? 0 : 1,
-                size,
-                orientation
-            );
-
-            if (parent == dockLayer)
-            {
-                dockRoot = split;
-                dockLayer.Add(split);
+                // Replace before reparenting target, preserving its position in the parent split.
+                ReplaceNode(target, split);
+                split.Add(before ? destination : target);
+                split.Add(before ? target : destination);
             }
+
+            destination.AddWindow(window);
+            if (source != null)
+                RemoveEmptyGroup(source);
+            activeGroup = destination;
+        }
+
+        void ReplaceNode(VisualElement node, VisualElement replacement)
+        {
+            var parent = node.parent;
+            int index = parent.IndexOf(node);
+            node.RemoveFromHierarchy();
+            replacement?.RemoveFromHierarchy();
+            if (replacement != null)
+                parent.Insert(index, replacement);
+            if (dockRoot == node)
+                dockRoot = replacement;
+        }
+
+        void RemoveEmptyGroup(DockGroup group)
+        {
+            if (group.childCount != 0)
+                return;
+
+            var split = group.GetFirstAncestorOfType<DockSplit>();
+            if (split == null)
+                ReplaceNode(group, null);
             else
             {
-                parent.Add(split);
+                var remaining = split[0] == group ? split[1] : split[0];
+                group.RemoveFromHierarchy();
+                ReplaceNode(split, remaining);
             }
+
+            if (activeGroup == group)
+                activeGroup = FindGroup(dockRoot);
+        }
+
+        static DockGroup FindGroup(VisualElement node)
+        {
+            while (node is DockSplit split)
+                node = split[0];
+            return node as DockGroup;
         }
     }
 }
