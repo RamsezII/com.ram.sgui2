@@ -7,7 +7,6 @@ namespace _SGUI2_
     {
         VisualElement
             dockLayer,
-            floatingLayer,
             modalLayer,
             popupLayer;
 
@@ -16,7 +15,6 @@ namespace _SGUI2_
         void Setup()
         {
             dockLayer = CreateLayer();
-            floatingLayer = CreateLayer();
             modalLayer = CreateLayer();
             popupLayer = CreateLayer();
             SetupDrag();
@@ -62,7 +60,6 @@ namespace _SGUI2_
             root.style.backgroundColor = new Color(0, 0, 0, .85f);
 
             root.Add(dockLayer);
-            root.Add(floatingLayer);
             root.Add(modalLayer);
             root.Add(popupLayer);
             root.Add(dragLayer);

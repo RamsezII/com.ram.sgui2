@@ -7,16 +7,10 @@ namespace _SGUI2_
     partial class SguiEditor
     {
         VisualElement dragLayer, dropPreview;
-        Label dragLabel;
-        readonly Label[] dockHints = new Label[5];
         SguiWindow draggedWindow;
-        FloatingWindow draggedFrame;
-        DockGroup dropGroup;
-        SguiDockSide dropSide;
-        int dragPointer = -1, dropIndex;
-        bool dragStarted, resizingFrame, dropAtRoot;
+        int dragPointer = -1;
+        bool dragStarted;
         Vector2 dragStart;
-        Rect frameStart, dropRect;
 
         void SetupDrag()
         {
@@ -26,26 +20,7 @@ namespace _SGUI2_
             dropPreview = new VisualElement { pickingMode = PickingMode.Ignore };
             dropPreview.style.position = Position.Absolute;
             dropPreview.style.backgroundColor = new Color(.2f, .55f, 1, .3f);
-            dragLabel = new Label { pickingMode = PickingMode.Ignore };
-            dragLabel.style.position = Position.Absolute;
-            dragLabel.style.backgroundColor = new Color(.1f, .1f, .1f, .95f);
-            dragLabel.style.color = Color.white;
-            dragLabel.style.paddingLeft = dragLabel.style.paddingRight = 6;
             dragLayer.Add(dropPreview);
-            string[] captions = { "Tabs", "<", ">", "^", "v" };
-            for (int i = 0; i < dockHints.Length; i++)
-            {
-                var hint = new Label(captions[i]) { pickingMode = PickingMode.Ignore };
-                hint.style.position = Position.Absolute;
-                hint.style.width = 36;
-                hint.style.height = 28;
-                hint.style.unityTextAlign = TextAnchor.MiddleCenter;
-                hint.style.backgroundColor = new Color(.15f, .35f, .55f, .9f);
-                hint.style.color = Color.white;
-                dragLayer.Add(hint);
-                dockHints[i] = hint;
-            }
-            dragLayer.Add(dragLabel);
             dragLayer.style.display = DisplayStyle.None;
         }
 
@@ -60,7 +35,6 @@ namespace _SGUI2_
                 element.RegisterCallback<PointerCaptureOutEvent>(OnDragCaptureOut);
                 element.RegisterCallback<KeyDownEvent>(OnDragKey, TrickleDown.TrickleDown);
                 element.RegisterCallback<DetachFromPanelEvent>(OnDragDetach);
-                element.RegisterCallback<GeometryChangedEvent>(OnWorkspaceResize);
             }
             else
             {
@@ -70,213 +44,115 @@ namespace _SGUI2_
                 element.UnregisterCallback<PointerCaptureOutEvent>(OnDragCaptureOut);
                 element.UnregisterCallback<KeyDownEvent>(OnDragKey, TrickleDown.TrickleDown);
                 element.UnregisterCallback<DetachFromPanelEvent>(OnDragDetach);
-                element.UnregisterCallback<GeometryChangedEvent>(OnWorkspaceResize);
             }
         }
 
         void BeginTabDrag(SguiWindow window, Tab tab, PointerDownEvent evt)
         {
-            // The close button must retain its native behavior.
+            if (evt.button != 0 || dragPointer != -1 || root == null)
+                return;
+            // Leave the native close button alone.
             for (var element = evt.target as VisualElement; element != null && element != tab.tabHeader; element = element.parent)
                 if (element.ClassListContains(Tab.closeButtonUssClassName))
                     return;
-            if (!BeginDrag(evt))
-                return;
+
             draggedWindow = window;
-            var group = GetWindowGroup(window);
-            group.SelectWindow(window);
-            activeGroup = group;
-            group.GetFirstAncestorOfType<FloatingWindow>()?.BringToFront();
-        }
-
-        void BeginFrameDrag(FloatingWindow frame, bool resize, PointerDownEvent evt)
-        {
-            if (!BeginDrag(evt))
-                return;
-            draggedFrame = frame;
-            resizingFrame = resize;
-            frameStart = frame.layout;
-            frame.BringToFront();
-        }
-
-        bool BeginDrag(PointerDownEvent evt)
-        {
-            if (evt.button != 0 || dragPointer != -1 || root == null)
-                return false;
             dragPointer = evt.pointerId;
-            dragStart = floatingLayer.WorldToLocal(evt.position);
+            dragStart = evt.position;
+            activeGroup = GetWindowGroup(window);
+            activeGroup.SelectWindow(window);
             root.Focus();
             root.CapturePointer(dragPointer);
-            // Prevent the native handle dragger from competing for the same pointer.
+            // One gesture on the entire label, without the native handle competing for capture.
             evt.StopImmediatePropagation();
-            return true;
         }
 
         void OnDragMove(PointerMoveEvent evt)
         {
             if (evt.pointerId != dragPointer)
                 return;
-            var position = floatingLayer.WorldToLocal(evt.position);
-            if (!dragStarted && (position - dragStart).sqrMagnitude < 36)
+            if (!dragStarted && ((Vector2)evt.position - dragStart).sqrMagnitude < 36)
                 return;
             dragStarted = true;
-            if (draggedFrame != null)
-            {
-                var rect = frameStart;
-                if (resizingFrame) rect.size += position - dragStart;
-                else rect.position += position - dragStart;
-                SetFloatingRect(draggedFrame, rect);
-            }
-            else
-            {
-                ResolveDrop(evt.position, evt.altKey);
-                ShowDrop(evt.position);
-            }
+            var drop = ResolveDrop(evt.position);
+            dragLayer.style.display = drop.group == null ? DisplayStyle.None : DisplayStyle.Flex;
+            var local = dragLayer.WorldToLocal(drop.rect.position);
+            dropPreview.style.left = local.x;
+            dropPreview.style.top = local.y;
+            dropPreview.style.width = drop.rect.width;
+            dropPreview.style.height = drop.rect.height;
             evt.StopPropagation();
         }
 
-        void ResolveDrop(Vector2 position, bool forceFloat)
+        // All coordinates here are panel coordinates. Only the preview converts to local space.
+        (DockGroup group, SguiDockSide side, int index, Rect rect) ResolveDrop(Vector2 position)
         {
-            dropGroup = null;
-            dropAtRoot = false;
-            dropIndex = -1;
             var picked = root.panel.Pick(position);
             var group = picked as DockGroup ?? picked?.GetFirstAncestorOfType<DockGroup>();
-            if (group != null && !dockLayer.Contains(group) && !floatingLayer.Contains(group))
-                group = null;
+            if (group == null || !dockLayer.Contains(group) || !group.worldBound.Contains(position))
+                return default;
 
-            var bounds = group != null ? group.worldBound : dockLayer.worldBound;
-            bool emptyWorkspace = dockRoot == null && picked is not FloatingWindow && picked?.GetFirstAncestorOfType<FloatingWindow>() == null;
-            ShowDockHints(bounds, !forceFloat && bounds.Contains(position) && (group != null || emptyWorkspace));
-            bool header = group != null && group.contentViewport.worldBound.Contains(position);
+            var bounds = group.worldBound;
+            var side = SguiDockSide.Center;
+            if (group.contentViewport.worldBound.Contains(position))
+            {
+                int index = 0;
+                float marker = group.contentViewport.worldBound.xMin;
+                for (int i = 0; i < group.childCount; i++)
+                {
+                    var tab = group.GetTab(i);
+                    if (tab.userData == draggedWindow) continue;
+                    var header = tab.tabHeader.worldBound;
+                    if (position.x < header.center.x) { marker = header.xMin; break; }
+                    index++;
+                    marker = header.xMax;
+                }
+                return (group, side, index, new Rect(marker, group.contentViewport.worldBound.yMin, 3, group.contentViewport.worldBound.height));
+            }
+
             float edge = Mathf.Min(60, Mathf.Min(bounds.width, bounds.height) * .2f);
-            var center = new Rect(bounds.center - new Vector2(40, 40), new Vector2(80, 80));
-            bool zone = bounds.Contains(position) && (header || center.Contains(position)
-                || position.x < bounds.xMin + edge || position.x > bounds.xMax - edge
-                || position.y < bounds.yMin + edge || position.y > bounds.yMax - edge);
+            if (position.x < bounds.xMin + edge) side = SguiDockSide.Left;
+            else if (position.x > bounds.xMax - edge) side = SguiDockSide.Right;
+            else if (position.y < bounds.yMin + edge) side = SguiDockSide.Top;
+            else if (position.y > bounds.yMax - edge) side = SguiDockSide.Bottom;
+            if (group == GetWindowGroup(draggedWindow) && group.childCount == 1)
+                side = SguiDockSide.Center;
 
-            if (!forceFloat && zone && (group != null || emptyWorkspace))
-            {
-                dropGroup = group;
-                dropAtRoot = group == null;
-                dropSide = SguiDockSide.Center;
-                if (!header)
-                {
-                    if (position.x < bounds.xMin + edge) dropSide = SguiDockSide.Left;
-                    else if (position.x > bounds.xMax - edge) dropSide = SguiDockSide.Right;
-                    else if (position.y < bounds.yMin + edge) dropSide = SguiDockSide.Top;
-                    else if (position.y > bounds.yMax - edge) dropSide = SguiDockSide.Bottom;
-                }
-                // Splitting a group's only tab away from itself would just recreate the same group.
-                if (group == GetWindowGroup(draggedWindow) && group.childCount == 1)
-                    dropSide = SguiDockSide.Center;
-                dropRect = bounds;
-                if (dropSide == SguiDockSide.Left) dropRect.width *= .5f;
-                if (dropSide == SguiDockSide.Right) { dropRect.x += bounds.width * .5f; dropRect.width *= .5f; }
-                if (dropSide == SguiDockSide.Top) dropRect.height *= .5f;
-                if (dropSide == SguiDockSide.Bottom) { dropRect.y += bounds.height * .5f; dropRect.height *= .5f; }
-                if (header)
-                {
-                    dropIndex = 0;
-                    float marker = group.contentViewport.worldBound.xMin;
-                    for (int i = 0; i < group.childCount; i++)
-                    {
-                        var tab = group.GetTab(i);
-                        if (tab.userData == draggedWindow) continue;
-                        var rect = tab.tabHeader.worldBound;
-                        if (position.x < rect.center.x) { marker = rect.xMin; break; }
-                        dropIndex++;
-                        marker = rect.xMax;
-                    }
-                    dropRect = new Rect(marker, group.contentViewport.worldBound.yMin, 3, group.contentViewport.worldBound.height);
-                }
-                return;
-            }
-
-            var local = floatingLayer.WorldToLocal(position);
-            var floatingRect = ClampFloatingRect(new Rect(local - new Vector2(80, 12), new Vector2(480, 320)));
-            dropRect = new Rect(floatingLayer.LocalToWorld(floatingRect.position), floatingRect.size);
-        }
-
-        void ShowDrop(Vector2 position)
-        {
-            dragLayer.style.display = DisplayStyle.Flex;
-            var local = dragLayer.WorldToLocal(dropRect.position);
-            dropPreview.style.left = local.x;
-            dropPreview.style.top = local.y;
-            dropPreview.style.width = dropRect.width;
-            dropPreview.style.height = dropRect.height;
-            var labelPosition = dragLayer.WorldToLocal(position) + new Vector2(16, 20);
-            dragLabel.style.left = labelPosition.x;
-            dragLabel.style.top = labelPosition.y;
-            dragLabel.text = dropGroup != null || dropAtRoot
-                ? $"{draggedWindow.title} — {dropSide} · Alt: float · Esc: cancel"
-                : $"{draggedWindow.title} — Float · Esc: cancel";
-        }
-
-        void ShowDockHints(Rect bounds, bool visible)
-        {
-            for (int i = 0; i < dockHints.Length; i++)
-            {
-                var hint = dockHints[i];
-                hint.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
-                var point = bounds.center;
-                if (i == 1) point.x = bounds.xMin + 22;
-                if (i == 2) point.x = bounds.xMax - 22;
-                if (i == 3) point.y = bounds.yMin + 22;
-                if (i == 4) point.y = bounds.yMax - 22;
-                point = dragLayer.WorldToLocal(point);
-                hint.style.left = point.x - 18;
-                hint.style.top = point.y - 14;
-            }
+            var rect = bounds;
+            if (side == SguiDockSide.Left) rect.width *= .5f;
+            if (side == SguiDockSide.Right) { rect.x += bounds.width * .5f; rect.width *= .5f; }
+            if (side == SguiDockSide.Top) rect.height *= .5f;
+            if (side == SguiDockSide.Bottom) { rect.y += bounds.height * .5f; rect.height *= .5f; }
+            return (group, side, -1, rect);
         }
 
         void OnDragUp(PointerUpEvent evt)
         {
             if (evt.pointerId != dragPointer || evt.button != 0)
                 return;
-            if (dragStarted && draggedWindow != null)
+            var window = draggedWindow;
+            var drop = dragStarted ? ResolveDrop(evt.position) : default;
+            CancelDrag();
+            if (drop.group != null)
             {
-                ResolveDrop(evt.position, evt.altKey);
-                var window = draggedWindow;
-                var group = dropGroup;
-                var side = dropSide;
-                var index = dropIndex;
-                var atRoot = dropAtRoot;
-                var rect = new Rect(floatingLayer.WorldToLocal(dropRect.position), dropRect.size);
-                FinishDrag();
-                if (atRoot) DockAtRoot(window);
-                else if (group != null)
-                {
-                    float size = side is SguiDockSide.Left or SguiDockSide.Right ? group.layout.width / 2 : group.layout.height / 2;
-                    Dock(window, group, side, Mathf.Max(1, size));
-                    if (index >= 0)
-                        group.ReorderTab(group.IndexOf(window.GetFirstAncestorOfType<Tab>()), Mathf.Min(index, group.childCount - 1));
-                }
-                else FloatWindow(window, rect);
+                float size = drop.side is SguiDockSide.Left or SguiDockSide.Right
+                    ? drop.group.layout.width / 2 : drop.group.layout.height / 2;
+                Dock(window, drop.group, drop.side, Mathf.Max(1, size));
+                if (drop.index >= 0)
+                    drop.group.ReorderTab(drop.group.IndexOf(window.GetFirstAncestorOfType<Tab>()), Mathf.Min(drop.index, drop.group.childCount - 1));
             }
-            else FinishDrag();
             evt.StopPropagation();
-        }
-
-        void FinishDrag()
-        {
-            int pointer = dragPointer;
-            dragPointer = -1;
-            draggedWindow = null;
-            draggedFrame = null;
-            dropGroup = null;
-            dragStarted = false;
-            if (dragLayer != null) dragLayer.style.display = DisplayStyle.None;
-            if (root != null && pointer >= 0 && root.HasPointerCapture(pointer))
-                root.ReleasePointer(pointer);
         }
 
         void CancelDrag()
         {
-            if (draggedFrame != null)
-                SetFloatingRect(draggedFrame, frameStart);
-            FinishDrag();
+            int pointer = dragPointer;
+            dragPointer = -1;
+            draggedWindow = null;
+            dragStarted = false;
+            if (dragLayer != null) dragLayer.style.display = DisplayStyle.None;
+            if (root != null && pointer >= 0 && root.HasPointerCapture(pointer))
+                root.ReleasePointer(pointer);
         }
 
         void OnDragCancel(PointerCancelEvent evt) { if (evt.pointerId == dragPointer) CancelDrag(); }
@@ -285,11 +161,6 @@ namespace _SGUI2_
         void OnDragKey(KeyDownEvent evt)
         {
             if (dragPointer >= 0 && evt.keyCode == KeyCode.Escape) { CancelDrag(); evt.StopPropagation(); }
-        }
-        void OnWorkspaceResize(GeometryChangedEvent evt)
-        {
-            foreach (var element in floatingLayer.Children())
-                if (element is FloatingWindow frame) SetFloatingRect(frame, frame.layout);
         }
     }
 }

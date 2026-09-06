@@ -14,11 +14,7 @@ namespace _SGUI2_
                 this.editor = editor;
                 reorderable = true;
                 style.flexGrow = 1;
-                RegisterCallback<PointerDownEvent>(_ =>
-                {
-                    editor.activeGroup = this;
-                    GetFirstAncestorOfType<FloatingWindow>()?.BringToFront();
-                }, TrickleDown.TrickleDown);
+                RegisterCallback<PointerDownEvent>(_ => editor.activeGroup = this, TrickleDown.TrickleDown);
                 RegisterCallback<FocusInEvent>(_ => editor.activeGroup = this);
                 activeTabChanged += (_, current) =>
                 {

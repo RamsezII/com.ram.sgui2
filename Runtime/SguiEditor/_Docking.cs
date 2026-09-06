@@ -30,7 +30,7 @@ namespace _SGUI2_
                 return;
             }
 
-            if (activeGroup == null && dockRoot == null)
+            if (dockRoot == null)
             {
                 activeGroup = new DockGroup(this);
                 dockRoot = activeGroup;
@@ -66,7 +66,7 @@ namespace _SGUI2_
             if (group == null)
                 return;
 
-            if (window == draggedWindow || (draggedFrame != null && draggedFrame.Contains(window)))
+            if (window == draggedWindow)
                 CancelDrag();
 
             group.RemoveWindow(window);
@@ -79,7 +79,7 @@ namespace _SGUI2_
             if (window == null)
                 throw new ArgumentNullException(nameof(window));
             var group = window.GetFirstAncestorOfType<DockGroup>();
-            if (group != null && !dockLayer.Contains(group) && !floatingLayer.Contains(group))
+            if (group != null && !dockLayer.Contains(group))
                 throw new ArgumentException("The window belongs to another editor.", nameof(window));
             return group;
         }
@@ -146,11 +146,7 @@ namespace _SGUI2_
 
             var split = group.GetFirstAncestorOfType<DockSplit>();
             if (split == null)
-            {
-                var floating = group.GetFirstAncestorOfType<FloatingWindow>();
                 ReplaceNode(group, null);
-                floating?.RemoveFromHierarchy();
-            }
             else
             {
                 var remaining = split[0] == group ? split[1] : split[0];
@@ -159,14 +155,7 @@ namespace _SGUI2_
             }
 
             if (activeGroup == group)
-                activeGroup = FindAnyGroup();
-        }
-
-        DockGroup FindAnyGroup()
-        {
-            if (dockRoot != null)
-                return FindGroup(dockRoot);
-            return floatingLayer.childCount == 0 ? null : FindGroup(floatingLayer[floatingLayer.childCount - 1][0]);
+                activeGroup = FindGroup(dockRoot);
         }
 
         static DockGroup FindGroup(VisualElement node)
