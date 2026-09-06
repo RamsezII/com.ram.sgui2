@@ -1,32 +1,44 @@
 ﻿using _SGUI2_.windows;
-using System.Collections.Generic;
 using UnityEngine.UIElements;
 
 namespace _SGUI2_
 {
     partial class SguiEditor
     {
-        abstract class DockNode
+        sealed class DockGroup : TabView
         {
-            public DockSplit parent;
-        }
-
-        sealed class DockGroup : DockNode
-        {
-            public readonly List<SguiWindow> windows = new();
-            public TabView tabView;
-            public DockGroup(in SguiWindow window)
+            public DockGroup()
             {
-                windows.Add(window);
+                reorderable = true;
+                style.flexGrow = 1;
+            }
+
+            public void AddWindow(in SguiWindow window)
+            {
+                var tab = new Tab(window.title);
+                tab.Add(window);
+                Add(tab);
             }
         }
 
-        sealed class DockSplit : DockNode
+        sealed class DockSplit : TwoPaneSplitView
         {
-            public DockNode first, second;
-            public TwoPaneSplitViewOrientation orientation;
-            public int fixedPaneIndex;
-            public float fixedPaneDimension;
+            public DockSplit(
+                in VisualElement first,
+                in VisualElement second,
+                in int fixedPane,
+                in float size,
+                in TwoPaneSplitViewOrientation orientation
+                ) : base(
+                    fixedPaneIndex: fixedPane,
+                    fixedPaneStartDimension: size,
+                    orientation: orientation
+                    )
+            {
+                style.flexGrow = 1;
+                Add(first);
+                Add(second);
+            }
         }
     }
 }
