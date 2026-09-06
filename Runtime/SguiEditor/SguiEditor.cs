@@ -10,16 +10,17 @@ namespace _SGUI2_
     {
         public static SguiEditor instance;
 
-        [HideInInspector] public PanelRenderer panelRenderer;
-        [HideInInspector] public VisualElement root;
-        public int uiVersion = -1;
+        PanelRenderer panelRenderer;
+        VisualElement root;
+
+        [SerializeField] int uiVersion = -1;
 
         public readonly ValueNotifier<bool> toggle = new();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        static void OnAfterSceneLoad()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void OnBeforeSceneLoad()
         {
             Util.InstantiateOrCreate<SguiEditor>();
         }
@@ -33,6 +34,8 @@ namespace _SGUI2_
 
             panelRenderer = GetComponent<PanelRenderer>();
             panelRenderer.RegisterUIReloadCallback(OnUIReload);
+
+            AwakeLayers();
 
             base.Awake();
 
@@ -56,21 +59,6 @@ namespace _SGUI2_
         }
 
         //--------------------------------------------------------------------------------------------------------------
-
-        void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
-        {
-            this.root = root;
-
-            if (version == uiVersion)
-                return;
-            uiVersion = version;
-
-            root.Clear();
-            root.style.flexGrow = 1;
-            root.Add(CreateDesktop());
-
-            OnToggleVisual();
-        }
 
         void OnToggleVisual()
         {
