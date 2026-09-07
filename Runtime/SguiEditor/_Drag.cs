@@ -64,13 +64,13 @@ namespace _SGUI2_
             if (!dragStarted && ((Vector2)evt.position - dragStart).sqrMagnitude < 36)
                 return;
             dragStarted = true;
-            var drop = ResolveDrop(evt.position);
-            dragLayer.style.display = drop.group == null ? DisplayStyle.None : DisplayStyle.Flex;
-            var local = dragLayer.WorldToLocal(drop.rect.position);
+            var (group, _, _, rect) = ResolveDrop(evt.position);
+            dragLayer.style.display = group == null ? DisplayStyle.None : DisplayStyle.Flex;
+            var local = dragLayer.WorldToLocal(rect.position);
             dropPreview.style.left = local.x;
             dropPreview.style.top = local.y;
-            dropPreview.style.width = drop.rect.width;
-            dropPreview.style.height = drop.rect.height;
+            dropPreview.style.width = rect.width;
+            dropPreview.style.height = rect.height;
             evt.StopPropagation();
         }
 

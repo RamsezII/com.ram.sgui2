@@ -1,10 +1,10 @@
-/* Shared by runtime and UI Builder. Change selectors, not preview inline styles. */
 .sgui-editor {
     flex-grow: 1;
     min-width: 0;
     min-height: 0;
     background-color: transparent;
     color: rgb(220, 223, 230);
+    -unity-font-definition: url("project://database/Assets/_UI_/fonts/ubuntu-font-family-0_83/UbuntuMono-R.ttf?fileID=12800000&guid=2b62a783291d84f45b1681201adabf9b&type=3#UbuntuMono-R");
 }
 
 .sgui-editor__layer {
@@ -19,13 +19,13 @@
     padding: 4px;
 }
 
-.sgui-editor__group, .sgui-editor__split {
+.sgui-editor__group,
+.sgui-editor__split {
     flex-grow: 1;
     min-width: 0;
     min-height: 0;
 }
 
-/* One glass surface per dock group, including its tab strip. Unity 6.6 screen space. */
 .sgui-editor__group {
     margin: 3px;
     border-width: 1px;
