@@ -1,9 +1,9 @@
-/* Shared by the runtime and SguiEditor.uxml. Edit these selectors in UI Builder. */
+/* Shared by runtime and UI Builder. Change selectors, not preview inline styles. */
 .sgui-editor {
     flex-grow: 1;
     min-width: 0;
     min-height: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: transparent;
     color: rgb(220, 223, 230);
 }
 
@@ -15,37 +15,78 @@
     bottom: 0;
 }
 
+.sgui-editor__dock-layer {
+    padding: 4px;
+}
+
 .sgui-editor__group, .sgui-editor__split {
     flex-grow: 1;
     min-width: 0;
     min-height: 0;
 }
 
+/* One glass surface per dock group, including its tab strip. Unity 6.6 screen space. */
 .sgui-editor__group {
-    background-color: rgb(35, 38, 44);
+    margin: 3px;
+    border-width: 1px;
+    border-color: rgba(155, 160, 175, 0.45);
+    border-radius: 7px;
+    overflow: hidden;
+    background-color: rgba(29, 30, 34, 0.78);
+    backdrop-filter: blur(10px);
 }
 
 .sgui-editor__window {
     flex-grow: 1;
     min-width: 0;
     min-height: 0;
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding: 8px;
+    background-color: transparent;
 }
 
-.sgui-editor .unity-tab__header {
-    background-color: rgb(43, 47, 55);
-    color: rgb(173, 180, 192);
+.sgui-editor__group > .unity-tab-view__content-viewport {
+    background-color: rgba(42, 43, 48, 0.55);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(155, 160, 175, 0.25);
 }
 
-.sgui-editor .unity-tab__header:checked {
-    background-color: rgb(35, 38, 44);
-    color: rgb(235, 239, 247);
+.sgui-editor__group > .unity-tab-view__content-container,
+.sgui-editor__tab {
+    background-color: transparent;
+    border-width: 0;
+}
+
+.sgui-editor__group > .unity-tab-view__content-viewport .unity-tab__header {
+    margin: 3px 2px 0 2px;
+    padding: 3px 8px;
+    min-height: 27px;
+    border-width: 1px;
+    border-color: transparent;
+    border-radius: 5px 5px 0 0;
+    background-color: transparent;
+    color: rgb(175, 179, 190);
+}
+
+.sgui-editor__group > .unity-tab-view__content-viewport .unity-tab__header:hover {
+    background-color: rgba(90, 92, 105, 0.3);
+    border-color: rgba(155, 160, 175, 0.4);
+}
+
+.sgui-editor__group > .unity-tab-view__content-viewport .unity-tab__header:checked {
+    background-color: rgba(36, 36, 42, 0.8);
+    border-color: rgb(143, 128, 205);
+    border-bottom-color: transparent;
+    color: rgb(240, 238, 250);
+}
+
+.sgui-editor__group > .unity-tab-view__content-viewport .unity-tab__header-underline {
+    display: none;
 }
 
 .sgui-editor__drop-preview {
     position: absolute;
-    background-color: rgba(51, 140, 255, 0.3);
+    background-color: rgba(143, 128, 205, 0.24);
+    border-width: 1px;
+    border-color: rgb(163, 146, 232);
+    border-radius: 6px;
 }
