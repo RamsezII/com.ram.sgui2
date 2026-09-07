@@ -13,6 +13,8 @@ namespace _SGUI2_
         PanelRenderer panelRenderer;
         VisualElement root;
 
+        [SerializeField] StyleSheet styleSheet;
+
         [SerializeField] int uiVersion = -1;
 
         public readonly ValueNotifier<bool> toggle = new();
@@ -33,7 +35,8 @@ namespace _SGUI2_
             DontDestroyOnLoad(gameObject);
 
             panelRenderer = GetComponent<PanelRenderer>();
-            Setup();
+            SetupLayers();
+            SetupDrag();
             panelRenderer.RegisterUIReloadCallback(OnUIReload);
 
             base.Awake();
@@ -69,3 +72,4 @@ namespace _SGUI2_
         }
     }
 }
+

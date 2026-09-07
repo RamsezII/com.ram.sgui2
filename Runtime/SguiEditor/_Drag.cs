@@ -12,17 +12,7 @@ namespace _SGUI2_
         bool dragStarted;
         Vector2 dragStart;
 
-        void SetupDrag()
-        {
-            dragLayer = new VisualElement { pickingMode = PickingMode.Ignore };
-            dragLayer.style.position = Position.Absolute;
-            dragLayer.style.left = dragLayer.style.right = dragLayer.style.top = dragLayer.style.bottom = 0;
-            dropPreview = new VisualElement { pickingMode = PickingMode.Ignore };
-            dropPreview.style.position = Position.Absolute;
-            dropPreview.style.backgroundColor = new Color(.2f, .55f, 1, .3f);
-            dragLayer.Add(dropPreview);
-            dragLayer.style.display = DisplayStyle.None;
-        }
+        //--------------------------------------------------------------------------------------------------------------
 
         void RegisterDragCallbacks(VisualElement element, bool register)
         {

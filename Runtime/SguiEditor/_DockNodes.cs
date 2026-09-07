@@ -13,7 +13,7 @@ namespace _SGUI2_
             {
                 this.editor = editor;
                 reorderable = true;
-                style.flexGrow = 1;
+                AddToClassList("sgui-editor__group");
                 RegisterCallback<PointerDownEvent>(_ => editor.activeGroup = this, TrickleDown.TrickleDown);
                 RegisterCallback<FocusInEvent>(_ => editor.activeGroup = this);
                 activeTabChanged += (_, current) =>
@@ -33,6 +33,8 @@ namespace _SGUI2_
             public void AddWindow(SguiWindow window)
             {
                 var tab = new Tab(window.title) { closeable = true, userData = window };
+                tab.AddToClassList("sgui-editor__tab");
+                window.AddToClassList("sgui-editor__window");
                 tab.Add(window);
                 Add(tab);
                 activeTab = tab;
@@ -58,7 +60,7 @@ namespace _SGUI2_
             public DockSplit(int fixedPane, float size, TwoPaneSplitViewOrientation orientation)
                 : base(fixedPane, size, orientation)
             {
-                style.flexGrow = 1;
+                AddToClassList("sgui-editor__split");
             }
         }
     }

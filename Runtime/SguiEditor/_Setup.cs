@@ -12,27 +12,34 @@ namespace _SGUI2_
 
         //--------------------------------------------------------------------------------------------------------------
 
-        void Setup()
+        void SetupLayers()
         {
-            dockLayer = CreateLayer();
-            modalLayer = CreateLayer();
-            popupLayer = CreateLayer();
-            SetupDrag();
+            dockLayer = CreateLayer("sgui-editor__dock-layer");
+            modalLayer = CreateLayer("sgui-editor__modal-layer");
+            popupLayer = CreateLayer("sgui-editor__popup-layer");
 
-            static VisualElement CreateLayer()
+            static VisualElement CreateLayer(string className)
             {
                 var e = new VisualElement();
 
-                e.style.position = Position.Absolute;
-                e.style.left = 0;
-                e.style.right = 0;
-                e.style.top = 0;
-                e.style.bottom = 0;
+                e.AddToClassList("sgui-editor__layer");
+                e.AddToClassList(className);
 
                 e.pickingMode = PickingMode.Ignore;
 
                 return e;
             }
+        }
+
+        void SetupDrag()
+        {
+            dragLayer = new VisualElement { pickingMode = PickingMode.Ignore };
+            dragLayer.AddToClassList("sgui-editor__layer");
+            dragLayer.AddToClassList("sgui-editor__drag-layer");
+            dropPreview = new VisualElement { pickingMode = PickingMode.Ignore };
+            dropPreview.AddToClassList("sgui-editor__drop-preview");
+            dragLayer.Add(dropPreview);
+            dragLayer.style.display = DisplayStyle.None;
         }
 
         //--------------------------------------------------------------------------------------------------------------
@@ -56,8 +63,9 @@ namespace _SGUI2_
             uiVersion = version;
 
             root.Clear();
-            root.style.flexGrow = 1;
-            root.style.backgroundColor = new Color(0, 0, 0, .85f);
+            root.AddToClassList("sgui-editor");
+            if (styleSheet != null && !root.styleSheets.Contains(styleSheet))
+                root.styleSheets.Add(styleSheet);
 
             root.Add(dockLayer);
             root.Add(modalLayer);

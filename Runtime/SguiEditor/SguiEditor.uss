@@ -1,0 +1,51 @@
+/* Shared by the runtime and SguiEditor.uxml. Edit these selectors in UI Builder. */
+.sgui-editor {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: rgb(220, 223, 230);
+}
+
+.sgui-editor__layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.sgui-editor__group, .sgui-editor__split {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.sgui-editor__group {
+    background-color: rgb(35, 38, 44);
+}
+
+.sgui-editor__window {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.sgui-editor .unity-tab__header {
+    background-color: rgb(43, 47, 55);
+    color: rgb(173, 180, 192);
+}
+
+.sgui-editor .unity-tab__header:checked {
+    background-color: rgb(35, 38, 44);
+    color: rgb(235, 239, 247);
+}
+
+.sgui-editor__drop-preview {
+    position: absolute;
+    background-color: rgba(51, 140, 255, 0.3);
+}

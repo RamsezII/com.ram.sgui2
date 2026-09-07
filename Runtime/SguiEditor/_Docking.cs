@@ -18,6 +18,8 @@ namespace _SGUI2_
         VisualElement dockRoot;
         DockGroup activeGroup;
 
+        //--------------------------------------------------------------------------------------------------------------
+
         // Opening an existing instance only selects it. Use DockWindow to move it.
         public void OpenWindow(SguiWindow window, SguiDockSide side = SguiDockSide.Center, float fixedPaneDimension = 300)
         {
