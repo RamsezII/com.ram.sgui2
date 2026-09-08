@@ -5,25 +5,45 @@
 }
 
 .SguiFrame {
+    background-color: rgba(0, 0, 0, 0.102);
+    overflow: hidden;
     backdrop-filter: blur(15);
-    background-color: rgba(255, 255, 255, 0.102);
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-left-color: rgba(0, 0, 0, 0.502);
-    border-right-color: rgba(0, 0, 0, 0.502);
-    border-top-color: rgba(0, 0, 0, 0.502);
-    border-bottom-color: rgba(0, 0, 0, 0.502);
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
-    overflow: hidden;
 }
 
-#SguiFrame > .unity-tab-view {
+.SguiFrame > .unity-tab-view {
     flex-grow: 1;
 }
 
+.SguiFrame > .unity-tab-view > .unity-tab-view__content-viewport {
+    background-color: transparent;
+}
 
+.SguiFrame > .unity-tab-view > .unity-tab-view__content-viewport > .unity-tab-view__header-container {
+    font-size: 8px;
+    -unity-font-definition: url("project://database/Assets/_SGUI2_/Fonts/Ubuntu_Mono/UbuntuMono-Regular.ttf?fileID=12800000&guid=ee7cd79a36599ff418866ce8edfebbca&type=3#UbuntuMono-Regular");
+    color: rgb(255, 0, 0);
+}
+
+.SguiFrame > .unity-tab-view > .unity-tab-view__content-viewport > .unity-tab-view__header-container > .unity-tab__header {
+    background-color: rgba(0, 0, 0, 0.502);
+}
+
+.SguiFrame > .unity-tab-view > .unity-tab-view__content-viewport > .unity-tab-view__header-container > .unity-tab__header:checked {
+}
+
+.SguiFrame > .unity-tab-view > .unity-tab-view__content-viewport > .unity-tab-view__header-container > .unity-tab__header > .unity-tab__header-label {
+}
+
+.SguiFrame > .unity-tab-view > .unity-tab-view__content-viewport > .unity-tab-view__header-container > .unity-tab__header > .unity-tab__header-label:checked {
+}
+
+.SguiFrame > .unity-tab-view > .unity-tab-view__content-viewport > .unity-tab-view__content-container {
+}
+
+.SguiFrame > .unity-tab-view > .unity-tab-view__content-viewport > .unity-tab-view__content-container > .unity-tab {
+}
+
+.SguiFrame > .unity-tab-view > .unity-tab-view__content-viewport > .unity-tab-view__content-container > .unity-tab__content-container {
+}
