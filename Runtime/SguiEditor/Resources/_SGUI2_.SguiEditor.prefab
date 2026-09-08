@@ -82,7 +82,7 @@ PanelRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   serializedVersion: 1
-  m_PanelSettings: {fileID: 11400000, guid: 5214e7728aad800469b7178284f0e0aa, type: 2}
+  m_PanelSettings: {fileID: 11400000, guid: e826db55f576637408ff0f07be8a2ad1, type: 2}
   sourceAsset: {fileID: 0}
   m_ParentUI: {fileID: 0}
   m_WorldSpaceSizeMode: 1
@@ -104,6 +104,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ram._SGUI2_::_SGUI2_.SguiEditor
   _destroyed: 0
-  panelRenderer: {fileID: 0}
   styleSheet: {fileID: 7433441132597879392, guid: a9fb7d9a089a7b44d9b3ae5116680b8c, type: 3}
   uiVersion: -1

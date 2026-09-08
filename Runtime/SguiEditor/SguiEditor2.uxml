@@ -1,0 +1,9 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/_SGUI2_/Runtime/SguiEditor/SguiEditor2.uss?fileID=7433441132597879392&amp;guid=cc1f0e05048105045bca91220276d781&amp;type=3#SguiEditor2"/>
+    <ui:VisualElement name="SguiFrame" class="SguiFrame" style="width: 172px; height: 252px; position: absolute; bottom: 43px; right: 42px;">
+        <ui:TabView reorderable="true">
+            <ui:Tab label="Tab" name="hierarchy" closeable="true"/>
+            <ui:Tab label="Tab" name="inspector" closeable="true"/>
+        </ui:TabView>
+    </ui:VisualElement>
+</ui:UXML>

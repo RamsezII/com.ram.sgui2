@@ -4,7 +4,7 @@
     min-height: 0;
     background-color: transparent;
     color: rgb(220, 223, 230);
-    -unity-font-definition: url("project://database/Assets/_UI_/fonts/ubuntu-font-family-0_83/UbuntuMono-R.ttf?fileID=12800000&guid=2b62a783291d84f45b1681201adabf9b&type=3#UbuntuMono-R");
+    -unity-font-definition: url("project://database/Assets/_SGUI2_/Fonts/Ubuntu_Mono/UbuntuMono-Regular.ttf?fileID=12800000&guid=ee7cd79a36599ff418866ce8edfebbca&type=3#UbuntuMono-Regular");
 }
 
 .sgui-editor__layer {

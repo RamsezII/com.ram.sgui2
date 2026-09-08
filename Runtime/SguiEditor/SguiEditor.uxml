@@ -1,38 +1,37 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <Style src="SguiEditor.uss" />
-    <!-- Design preview only. Runtime creates the same classes from C#. -->
+    <Style src="project://database/Assets/_SGUI2_/Runtime/SguiEditor/SguiEditor2.uss?fileID=7433441132597879392&amp;guid=cc1f0e05048105045bca91220276d781&amp;type=3#SguiEditor2"/>
     <ui:VisualElement name="SguiEditor-preview" class="sgui-editor">
-        <ui:VisualElement class="sgui-editor__layer sgui-editor__dock-layer" picking-mode="Ignore">
+        <ui:VisualElement picking-mode="Ignore" class="sgui-editor__layer sgui-editor__dock-layer">
             <ui:TwoPaneSplitView fixed-pane-index="0" fixed-pane-initial-dimension="260" orientation="Horizontal" class="sgui-editor__split">
                 <ui:TabView reorderable="true" class="sgui-editor__group">
                     <ui:Tab label="Hierarchy" closeable="true" class="sgui-editor__tab">
                         <ui:VisualElement class="sgui-editor__window">
-                            <ui:Label text="Sample hierarchy" />
-                            <ui:Button text="Player" />
-                            <ui:Button text="Vehicle" />
-                            <ui:Button text="Environment" />
+                            <ui:Label text="Sample hierarchy"/>
+                            <ui:Button text="Player"/>
+                            <ui:Button text="Vehicle"/>
+                            <ui:Button text="Environment"/>
                         </ui:VisualElement>
                     </ui:Tab>
                     <ui:Tab label="Assets" closeable="true" class="sgui-editor__tab">
                         <ui:VisualElement class="sgui-editor__window">
-                            <ui:Label text="Sample assets" />
+                            <ui:Label text="Sample assets"/>
                         </ui:VisualElement>
                     </ui:Tab>
                 </ui:TabView>
                 <ui:TabView reorderable="true" class="sgui-editor__group">
                     <ui:Tab label="Inspector" closeable="true" class="sgui-editor__tab">
                         <ui:VisualElement class="sgui-editor__window">
-                            <ui:TextField label="Name" value="Player" />
-                            <ui:Toggle label="Enabled" value="true" />
-                            <ui:Slider label="Speed" low-value="0" high-value="10" value="5" />
-                            <ui:Button text="Apply" />
+                            <ui:TextField label="Name" value="Player"/>
+                            <ui:Toggle label="Enabled" value="true"/>
+                            <ui:Slider label="Speed" low-value="0" high-value="10" value="5"/>
+                            <ui:Button text="Apply"/>
                         </ui:VisualElement>
                     </ui:Tab>
                 </ui:TabView>
             </ui:TwoPaneSplitView>
         </ui:VisualElement>
-        <ui:VisualElement class="sgui-editor__layer sgui-editor__modal-layer" picking-mode="Ignore" />
-        <ui:VisualElement class="sgui-editor__layer sgui-editor__popup-layer" picking-mode="Ignore" />
-        <ui:VisualElement class="sgui-editor__layer sgui-editor__drag-layer" picking-mode="Ignore" />
+        <ui:VisualElement picking-mode="Ignore" class="sgui-editor__layer sgui-editor__modal-layer"/>
+        <ui:VisualElement picking-mode="Ignore" class="sgui-editor__layer sgui-editor__popup-layer"/>
+        <ui:VisualElement picking-mode="Ignore" class="sgui-editor__layer sgui-editor__drag-layer"/>
     </ui:VisualElement>
 </ui:UXML>

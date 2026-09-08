@@ -1,0 +1,29 @@
+:root {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.SguiFrame {
+    backdrop-filter: blur(15);
+    background-color: rgba(255, 255, 255, 0.102);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-left-color: rgba(0, 0, 0, 0.502);
+    border-right-color: rgba(0, 0, 0, 0.502);
+    border-top-color: rgba(0, 0, 0, 0.502);
+    border-bottom-color: rgba(0, 0, 0, 0.502);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    overflow: hidden;
+}
+
+#SguiFrame > .unity-tab-view {
+    flex-grow: 1;
+}
+
+
